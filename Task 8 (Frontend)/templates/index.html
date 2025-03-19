@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mars Weather - InSight API</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Orbitron', sans-serif; /* Updated to Orbitron */
+            background: url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-1.2.1&auto=format&fit=crop&w=1952&q=80') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        /* Header Styling */
+        header {
+            background: rgba(27, 38, 59, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
+            margin-bottom: 20px;
+            animation: fadeIn 1.2s ease-in-out;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            color: #ffcc00;
+            text-shadow: 2px 2px 5px rgba(255, 204, 0, 0.5);
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.8;
+        }
+
+        /* Weather Card Grid */
+        .weather-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            justify-content: center;
+            margin: 0 auto;
+            max-width: 1200px;
+        }
+
+        /* Weather Cards */
+        .weather-card {
+            background: rgba(27, 38, 59, 0.7);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s ease-in-out forwards;
+        }
+
+        .weather-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(255, 255, 255, 0.25);
+        }
+
+        .weather-card h2 {
+            color: #ffcc00;
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+
+        .weather-card p {
+            font-size: 1.1em;
+            line-height: 1.5;
+        }
+
+        .weather-card i {
+            margin-right: 10px;
+            color: #ffcc00;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 40px;
+            padding: 15px;
+            font-size: 0.9em;
+            background: rgba(27, 38, 59, 0.8);
+            border-radius: 10px;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+
+        /* Error Message */
+        .error {
+            font-size: 1.5em;
+            color: red;
+            margin-top: 20px;
+            animation: fadeIn 1.2s ease-in-out;
+        }
+
+        .error button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: #ffcc00;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background 0.3s ease;
+        }
+
+        .error button:hover {
+            background: #ff9900;
+        }
+
+        /* Loading Animation */
+        .loading {
+            font-size: 2em;
+            color: #ffcc00;
+            margin-top: 20px;
+        }
+
+        .loading i {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2em;
+            }
+
+            header p {
+                font-size: 1em;
+            }
+
+            .weather-container {
+                grid-template-columns: 1fr;
+            }
+
+            .weather-card {
+                width: 90%;
+                margin: 0 auto;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Mars Weather Report</h1>
+        <p>Latest Atmospheric Data from NASA's InSight Mission</p>
+    </header>
+
+    <main>
+        {% if apod %}
+            <div class="weather-container">
+                {% for sol in apod['sol_keys'] | reverse %}
+                <div class="weather-card" style="animation-delay: {{ loop.index0 * 0.2 }}s;">
+                    <h2>Sol {{ sol }}</h2>
+                    <p><i class="fas fa-thermometer-half"></i><strong>Temperature:</strong> {{ apod[sol]['AT']['av'] | round(2) }}°C</p>
+                    <p><i class="fas fa-tachometer-alt"></i><strong>Pressure:</strong> {{ apod[sol]['PRE']['av'] | round(2) }} Pa</p>
+                    <p><i class="fas fa-wind"></i><strong>Wind Speed:</strong> {{ apod[sol]['HWS']['av'] | round(2) }} m/s</p>
+                    <p><i class="fas fa-leaf"></i><strong>Season:</strong> {{ apod[sol]['Season'] }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="error">
+                <p>No data available. Please try again later.</p>
+                <button onclick="window.location.reload()">Retry</button>
+            </div>
+        {% endif %}
+    </main>
+
+    <footer>
+        <p>Data provided by NASA's InSight Mars Weather API</p>
+    </footer>
+
+</body>
+</html>
