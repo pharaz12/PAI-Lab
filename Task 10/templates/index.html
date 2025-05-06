@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Information Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            text-align: center;
+            padding: 50px;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            margin-top: 30px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            width: 300px;
+            margin-right: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: #333;
+        }
+        .chat-box {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .input-box {
+            display: flex;
+            margin-top: 10px;
+        }
+        .input-box input {
+            width: 80%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .input-box button {
+            width: 18%;
+            padding: 10px;
+            background-color: #007bff;
+            border: none;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .input-box button:hover {
+            background-color: #0056b3;
+        }
+        .message {
+            padding: 8px 12px;
+            margin: 5px;
+            border-radius: 5px;
+        }
+        .user-message {
+            background-color: #d1e7ff;
+            text-align: right;
+        }
+        .bot-message {
+            background-color: #e0e0e0;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Welcome to the Hotel Information Chatbot!</h1>
+<p>Ask me about our hotel services, rooms, and availability.</p>
+
+<div class="chat-box" id="chat-box">
+    <!-- Chat messages will appear here -->
+</div>
+
+<div class="input-box">
+    <input type="text" id="user-input" placeholder="Ask about our hotel services..." />
+    <button onclick="sendMessage()">Send</button>
+</div>
+
+<script>
+    // Sample hotel information data
+    const hotelInfo = {
+        'rooms': [
+            {'type': 'Single Room', 'price': '$100 per night', 'available': true},
+            {'type': 'Double Room', 'price': '$150 per night', 'available': true},
+            {'type': 'Suite', 'price': '$250 per night', 'available': false}
+        ],
+        'facilities': [
+            'Swimming Pool', 'Gym', 'Free Wi-Fi', 'Restaurant', 'Spa', 'Parking'
+        ],
+        'contact': {
+            'phone': '123-456-7890',
+            'email': 'info@hotel.com',
+            'address': '456 Luxury Street, Cityname'
+        }
+    };
+
+    // Function to display the chat message
+    function displayMessage(message, sender) {
+        const chatBox = document.getElementById('chat-box');
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message');
+        messageElement.classList.add(sender === 'user' ? 'user-message' : 'bot-message');
+        messageElement.textContent = message;
+        chatBox.appendChild(messageElement);
+        chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the bottom
+    }
+
+    // Function to send the user's message and receive a response
+    function sendMessage() {
+        const userInput = document.getElementById('user-input').value.trim();
+        if (userInput === '') return;
+
+        // Display the user's message
+        displayMessage(userInput, 'user');
+
+        // Process the user's input and generate a bot response
+        const botResponse = getBotResponse(userInput);
+
+        // Display the bot's response after a short delay
+        setTimeout(() => {
+            displayMessage(botResponse, 'bot');
+        }, 500);
+
+        // Clear the input box
+        document.getElementById('user-input').value = '';
+    }
+
+    // Function to generate bot responses based on the user's message
+    function getBotResponse(input) {
+        const lowerInput = input.toLowerCase();
+
+        if (lowerInput.includes('room') || lowerInput.includes('rooms')) {
+            return getRoomInfo();
+        } else if (lowerInput.includes('facility') || lowerInput.includes('facilities')) {
+            return getFacilitiesInfo();
+        } else if (lowerInput.includes('contact') || lowerInput.includes('phone') || lowerInput.includes('email')) {
+            return getContactInfo();
+        } else {
+            return "Sorry, I didn't understand. You can ask about rooms, facilities, or contact information.";
+        }
+    }
+
+    // Function to get room information
+    function getRoomInfo() {
+        let response = 'Here are the available rooms:\n';
+        hotelInfo.rooms.forEach(room => {
+            response += `${room.type} - ${room.price} - ${room.available ? 'Available' : 'Not Available'}\n`;
+        });
+        return response;
+    }
+
+    // Function to get facilities information
+    function getFacilitiesInfo() {
+        return 'Our hotel offers the following facilities: ' + hotelInfo.facilities.join(', ') + '.';
+    }
+
+    // Function to get contact information
+    function getContactInfo() {
+        const contact = hotelInfo.contact;
+        return `You can reach us at:\nPhone: ${contact.phone}\nEmail: ${contact.email}\nAddress: ${contact.address}`;
+    }
+</script>
+
+</body>
+</html>
